@@ -1,0 +1,157 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Docs">
+      <UniqueIdentifier>{92abcbda-50ac-405d-b966-236dbfe78012}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Aux">
+      <UniqueIdentifier>{d3b495fd-c51f-403d-8951-206e36da6d90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EFM">
+      <UniqueIdentifier>{a9bb5c56-5dec-4984-b2f8-0880aebb33fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Audio">
+      <UniqueIdentifier>{adc74490-9a45-4203-87cf-586e8ff9e016}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Voices">
+      <UniqueIdentifier>{2ac45132-808e-440b-a6ae-8675f003f854}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Bank">
+      <UniqueIdentifier>{c5597bf7-78e8-48f2-8480-33e1a3d90455}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{608cb0f5-5ee7-47d4-a87c-e3400cd9be54}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="XEFM.h">
+      <Filter>EFM</Filter>
+    </ClInclude>
+    <ClInclude Include="XEFMReader.h">
+      <Filter>EFM</Filter>
+    </ClInclude>
+    <ClInclude Include="XAux.h">
+      <Filter>Aux</Filter>
+    </ClInclude>
+    <ClInclude Include="XException.h">
+      <Filter>Aux</Filter>
+    </ClInclude>
+    <ClInclude Include="XParserBase.h">
+      <Filter>Aux</Filter>
+    </ClInclude>
+    <ClInclude Include="XAudioCore.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="XAudioPlayer.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="XVoicePool.h">
+      <Filter>Voices</Filter>
+    </ClInclude>
+    <ClInclude Include="XVoiceObject.h">
+      <Filter>Voices</Filter>
+    </ClInclude>
+    <ClInclude Include="XVoiceBase.h">
+      <Filter>Voices</Filter>
+    </ClInclude>
+    <ClInclude Include="XStreamVoice.h">
+      <Filter>Voices</Filter>
+    </ClInclude>
+    <ClInclude Include="XPlainVoice.h">
+      <Filter>Voices</Filter>
+    </ClInclude>
+    <ClInclude Include="XMusicFile.h">
+      <Filter>Bank</Filter>
+    </ClInclude>
+    <ClInclude Include="XSoundBank.h">
+      <Filter>Bank</Filter>
+    </ClInclude>
+    <ClInclude Include="XSoundFile.h">
+      <Filter>Bank</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="SFXPlayer.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="XEFM.cpp">
+      <Filter>EFM</Filter>
+    </ClCompile>
+    <ClCompile Include="XEFMReader.cpp">
+      <Filter>EFM</Filter>
+    </ClCompile>
+    <ClCompile Include="XAux.cpp">
+      <Filter>Aux</Filter>
+    </ClCompile>
+    <ClCompile Include="XException.cpp">
+      <Filter>Aux</Filter>
+    </ClCompile>
+    <ClCompile Include="XParserBase.cpp">
+      <Filter>Aux</Filter>
+    </ClCompile>
+    <ClCompile Include="XAudioCore.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="XAudioPlayer.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="XVoicePool.cpp">
+      <Filter>Voices</Filter>
+    </ClCompile>
+    <ClCompile Include="XVoiceObject.cpp">
+      <Filter>Voices</Filter>
+    </ClCompile>
+    <ClCompile Include="XVoiceBase.cpp">
+      <Filter>Voices</Filter>
+    </ClCompile>
+    <ClCompile Include="XStreamVoice.cpp">
+      <Filter>Voices</Filter>
+    </ClCompile>
+    <ClCompile Include="XPlainVoice.cpp">
+      <Filter>Voices</Filter>
+    </ClCompile>
+    <ClCompile Include="XMusicFile.cpp">
+      <Filter>Bank</Filter>
+    </ClCompile>
+    <ClCompile Include="XSoundBank.cpp">
+      <Filter>Bank</Filter>
+    </ClCompile>
+    <ClCompile Include="XSoundFile.cpp">
+      <Filter>Bank</Filter>
+    </ClCompile>
+    <ClCompile Include="SFXPlayer.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="SFXPlayer.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="SFXPlayer.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ToDo.txt">
+      <Filter>Docs</Filter>
+    </Text>
+  </ItemGroup>
+</Project>

@@ -24,13 +24,13 @@
     <ClCompile Include="auxParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ausPathMatrix.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="auxLZWCore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="auxLZWHash.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="auxPathMatrix.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,0 +1,26 @@
+Code review:
+-XException (done)
+-XParserBase (done)
+-XAux (done)
+-XAudioCore (done)
+-XSoundFile (done)
+-XSoundBank (done)
+-XEFM (done)
+-XEFMReader (done)
+-XAudioPlayer
+
+Add:
+- extended mode for XEFM (ability to read files than don't exists in the storage) (done)
+- XAudioPlayer: stopping stream feature (done)
+- XAudioPlayer: max count of streams feature (done)
+
+- XAudioPlayer: XVoiceObject (low-level voice) + XVoice & XStreamVoice object --> voice pool XVoicePool (done)
+- XAudioPlayer: Fetch()/Release() -- count with unloading (w/o copying data) (done)
+- XAudioPlayer: IStream impl. in XEFMReader(???)
+
+- XAudioPlayer: code review
+- add pan for voice
+- add pan for stream voice
+- add volume for voice
+- add volume for stream voice
+- add notify messages (done)
