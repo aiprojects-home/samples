@@ -86,6 +86,10 @@ public:
 			line = (uint32_t)(std::distance(itbegin, it)) + 1;
 			processed = false;
 
+			// ѕропускаем пустые строки и строки из пробелов.
+			if ( (std::regex_match(s, base_match, std::wregex(L"(\\s)*"))) || (s == L"") )
+				continue;
+
 			for (auto &e : es.top()->m_ChildElements)
 			{
 				if (std::regex_match(s, base_match, e.m_RegexBegin))

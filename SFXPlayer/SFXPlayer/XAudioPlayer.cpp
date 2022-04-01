@@ -172,18 +172,15 @@ void XAudioPlayer::PlaySimple(const uint16_t id)
 		throw XException(L"XAudioPlayer::PlaySimple(): can't fetch sound with id='%d'", id);
 	}
 
-	WAVEFORMATEX wfex;
-
-	m_pSoundBank->FetchFormat(id, wfex);
-
-	// Everything is OK. Add sound to queue.
+	// Все в порядке. Добавляем в очередь на создание.
 
 	{
 		std::unique_lock qlock{ m_CreateLock };
 
-		std::shared_ptr<XPlainVoice> voice = std::make_shared<XPlainVoice>(*this, m_VoicePool, *m_pSoundBank, wfex, id);
+		std::shared_ptr<XAudioVoice> spVoice = std::make_shared<XAudioVoice>();
+		spVoice->Init(id, this, &m_VoicePool, m_pSoundBank);
 
-		m_CreateQueue.push(voice);
+		m_CreateQueue.push(spVoice);
 	}
 
 	m_cvCreate.notify_one();
@@ -216,14 +213,13 @@ void XAudioPlayer::PlayStream(const uint16_t id)
 
 	// Everything is OK. Add stream to queue.
 
-	WAVEFORMATEX wfex_dummy;
-
 	{
 		std::unique_lock qlock{ m_CreateStreamLock };
 
-		std::shared_ptr<XStreamVoice> voice = std::make_shared<XStreamVoice>(*this, m_VoicePool, *m_pSoundBank, wfex_dummy, id);
+		std::shared_ptr<XAudioVoice> spVoice = std::make_shared<XAudioVoice>();
+		spVoice->Init(id, this, &m_VoicePool, m_pSoundBank);
 
-		m_CreateStreamQueue.push(voice);
+		m_CreateStreamQueue.push(spVoice);
 	}
 
 	m_cvCreateStream.notify_one();
@@ -245,7 +241,7 @@ void XAudioPlayer::StopStream(const uint16_t id)
 		
 		for (auto &ptr : m_StreamVoices)
 		{
-			if (ptr->m_nVoiceId == id)
+			if (ptr->GetId() == id)
 			{
 				// Stream found. Adding to deleting queue.
 
@@ -260,6 +256,35 @@ void XAudioPlayer::StopStream(const uint16_t id)
 				return;
 			}
 		}
+	}
+}
+
+void XAudioPlayer::OnPlaybackComplete(XAudioVoice* pVoice, bool bStream)
+{
+	if (bStream)
+	{
+		// Закончилось потоковое восрпоизведение. Добавляем в очередь на удаление и отплавляем уведомление.
+		{
+			std::unique_lock qlock{ m_DeleteStreamLock };
+
+			m_DeleteStreamQueue.push(pVoice);
+		}
+
+		m_cvDeleteStream.notify_one();
+
+		PostNotify(XAudioPlayer::XNotifyMessage(pVoice->GetId(), XAudioPlayer::XPlayerNotify::XN_STREAMING_STOP));
+
+	}
+	else
+	{
+		// Закончилось обычное воспроизведение. Добавляем в очередь на удаление.
+		{
+			std::unique_lock lock{ m_DeleteLock };
+
+			m_DeleteQueue.push(pVoice);
+		}
+
+		m_cvDelete.notify_one();
 	}
 }
 
@@ -283,15 +308,13 @@ void XAudioPlayer::ThreadCreator()
 		// Queue is not empty. Create voices.
 		while (!m_CreateQueue.empty())
 		{
-			std::shared_ptr<XPlainVoice> spVoice = m_CreateQueue.front();
+			std::shared_ptr<XAudioVoice> spVoice = m_CreateQueue.front();
 
 			// Voice processing. 
 			
 			try
 			{
-				spVoice->Init();
-				spVoice->FetchData();
-				spVoice->SubmitAndPlay();
+				spVoice->Play(false);
 
 				{
 					std::unique_lock vlock{ m_VoicesLock };
@@ -308,7 +331,7 @@ void XAudioPlayer::ThreadCreator()
 			{
 				// Something bad happened.
 
-				PostNotify(XNotifyMessage(spVoice->m_nVoiceId, XAudioPlayer::XPlayerNotify::XN_ERROR,
+				PostNotify(XNotifyMessage(spVoice->GetId(), XAudioPlayer::XPlayerNotify::XN_ERROR,
 					std::make_any<XException>(e)));
 			}
 
@@ -344,7 +367,7 @@ void XAudioPlayer::ThreadDeleter()
 		// Queue is not empty. Delete voices.
 		while (!m_DeleteQueue.empty())
 		{
-			XPlainVoice* pVoice = m_DeleteQueue.front();
+			XAudioVoice* pVoice = m_DeleteQueue.front();
 
 			// Voice processing.
 			{
@@ -392,19 +415,19 @@ void XAudioPlayer::ThreadStreamCreator()
 		// Queue is not empty. Create voices.
 		while (!m_CreateStreamQueue.empty())
 		{
-			std::shared_ptr<XStreamVoice> spStreamVoice = m_CreateStreamQueue.front();
+			std::shared_ptr<XAudioVoice> spStreamVoice = m_CreateStreamQueue.front();
 
 			// Voice processing. 
 
 			try
 			{
-				spStreamVoice->CreateAndPlay();
+				spStreamVoice->Play(true);
 			}
 			catch (const XException& e)
 			{
 				// Something bad happened.
 
-				PostNotify(XNotifyMessage(spStreamVoice->m_nVoiceId, XAudioPlayer::XPlayerNotify::XN_ERROR,
+				PostNotify(XNotifyMessage(spStreamVoice->GetId(), XAudioPlayer::XPlayerNotify::XN_ERROR,
 					std::make_any<XException>(e)));
 			}
 
@@ -447,7 +470,7 @@ void XAudioPlayer::ThreadStreamDeleter()
 		// Queue is not empty. Delete voices.
 		while (!m_DeleteStreamQueue.empty())
 		{
-			XStreamVoice* pStreamVoice = m_DeleteStreamQueue.front();
+			XAudioVoice* pStreamVoice = m_DeleteStreamQueue.front();
 
 			// Voice processing.
 			{

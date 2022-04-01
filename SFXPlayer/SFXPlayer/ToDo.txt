@@ -24,3 +24,42 @@ Add:
 - add volume for voice
 - add volume for stream voice
 - add notify messages (done)
+
+++++++++++++++++++++++++++++++++++++++++++++++++
+
+Рефакторинг.
+
+Код для работы с Windows Media SDK & Plain WAV выделить в отдельный компонент.
+
+XSoundDecoder - базовый интерфейс для работы с звуковыми файлами
+|-> XPlainWAVDecoder - работа с WAVE PCM
+|-> XWMADecoder      - работа с Windows Media SDK
+
+XSoundDecoderManager - менеджер для регистрации и работы с декодерами
+
+XSoundDecoder
+-------------
+
+void Open(const wchar_t* pFileName) - открывает указанный файл
+bool Close() - закрывает файл
+bool IsOpened() - возвращает true если файл открыт
+
+void Load() - загружает данные из файла в память
+bool Unload() - освобождает память если счетчик обращений равен 0
+bool IsLoaded() - возвращает true если файл загружен
+
+uint32_t GetSize() - возвращает размер данных
+bool GetFormat(WAVEFORMATEX & fmt) - возвращает формат данных
+
+bool GetData(std::unique_ptr<BYTE[]> &spData) - возвращает копию данных
+bool GetDataDirect(BYTE*& refData) - возвращает прямой указатель на данные и накручивает счетчик
+void FreeData() - скручивает внутренний счетчик
+
+-- Декодирование
+bool DecodeStart(WAVEFORMATEX &wfex)
+uint32_t DecodeBytes(std::unique_ptr<uint8_t[]>& spDestBuffer, const uint32_t count)
+bool DecodeStop()
+
+bool IsDecoding() - true, если идет распаковка
+
+

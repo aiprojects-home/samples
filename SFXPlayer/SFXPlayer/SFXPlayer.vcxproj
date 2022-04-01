@@ -160,42 +160,49 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
+    <ClInclude Include="IXAudioPlayerCallback.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SFXPlayer.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="XAudioCore.h" />
     <ClInclude Include="XAudioPlayer.h" />
+    <ClInclude Include="XAudioVoice.h" />
+    <ClInclude Include="XBitMatrix.h" />
+    <ClInclude Include="XDecoderManager.h" />
     <ClInclude Include="XEFM.h" />
     <ClInclude Include="XEFMReader.h" />
     <ClInclude Include="XException.h" />
-    <ClInclude Include="XMusicFile.h" />
+    <ClInclude Include="XKeyGenerator.h" />
     <ClInclude Include="XParserBase.h" />
-    <ClInclude Include="XPlainVoice.h" />
+    <ClInclude Include="XPCMDecoder.h" />
     <ClInclude Include="XSoundBank.h" />
-    <ClInclude Include="XSoundFile.h" />
+    <ClInclude Include="XSoundBankParser.h" />
+    <ClInclude Include="XSoundDecoder.h" />
     <ClInclude Include="XAux.h" />
-    <ClInclude Include="XStreamVoice.h" />
-    <ClInclude Include="XVoiceBase.h" />
     <ClInclude Include="XVoiceObject.h" />
     <ClInclude Include="XVoicePool.h" />
+    <ClInclude Include="XWMADecoder.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SFXPlayer.cpp" />
     <ClCompile Include="XAudioCore.cpp" />
     <ClCompile Include="XAudioPlayer.cpp" />
+    <ClCompile Include="XAudioVoice.cpp" />
+    <ClCompile Include="XBitMatrix.cpp" />
+    <ClCompile Include="XDecoderManager.cpp" />
     <ClCompile Include="XEFM.cpp" />
     <ClCompile Include="XEFMReader.cpp" />
     <ClCompile Include="XException.cpp" />
-    <ClCompile Include="XMusicFile.cpp" />
+    <ClCompile Include="XKeyGenerator.cpp" />
     <ClCompile Include="XParserBase.cpp" />
-    <ClCompile Include="XPlainVoice.cpp" />
+    <ClCompile Include="XPCMDecoder.cpp" />
     <ClCompile Include="XSoundBank.cpp" />
-    <ClCompile Include="XSoundFile.cpp" />
+    <ClCompile Include="XSoundBankParser.cpp" />
+    <ClCompile Include="XSoundDecoder.cpp" />
     <ClCompile Include="XAux.cpp" />
-    <ClCompile Include="XStreamVoice.cpp" />
-    <ClCompile Include="XVoiceBase.cpp" />
     <ClCompile Include="XVoiceObject.cpp" />
     <ClCompile Include="XVoicePool.cpp" />
+    <ClCompile Include="XWMADecoder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SFXPlayer.rc" />

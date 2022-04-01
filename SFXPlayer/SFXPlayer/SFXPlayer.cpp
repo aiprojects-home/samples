@@ -4,17 +4,25 @@
 #include "framework.h"
 #include "SFXPlayer.h"
 #include "XSoundBank.h"
-#include "XSoundFile.h"
 #include "XException.h"
 #include "XEFM.h"
 #include "XEFMReader.h"
 #include "XAudioCore.h"
 #include "XAudioPlayer.h"
-#include "XMusicFile.h"
 
 #include <string>
 #include <memory>
 #include <vector>
+
+#include "XBitMatrix.h"
+#include "XKeyGenerator.h"
+#include "XWMADecoder.h"
+
+#include "XDecoderManager.h"
+
+#include "XSoundBankParser.h"
+
+#include <cwctype>
 
 #define MAX_LOADSTRING 100
 
@@ -137,6 +145,7 @@ int _solutionNumberOfDiscIntersections(std::vector<int>& A)
 	return count;
 }
 
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
@@ -145,16 +154,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    
+
 	// DISCS...
-	std::vector<int> d({ 1,5,2,1,5,5,5,5,3,2,1,2,4,0 , 1, 2, 3, 55, 66, 12, 1, 0, 0, 12, 11, 2});
+/*	std::vector<int> d({ 1,5,2,1,5,5,5,5,3,2,1,2,4,0 , 1, 2, 3, 55, 66, 12, 1, 0, 0, 12, 11, 2});
 
 	int n1 = _solutionNumberOfDiscIntersections(d);
 	int n2 = solutionNumberOfDiscIntersections(d);
-
+*/
 	//
 	
 	// TODO: Place code here.
+
 
 	::CoInitializeEx(NULL, COINIT::COINIT_MULTITHREADED);
 
@@ -173,7 +183,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		XEFM::Current().AssignFile(L"e:\\_1\\storage.e");
 		XEFM::Current().SetExtendedMode(true);
 
-		bank.AssignFile(L"\\bank.txt");
+		bank.AssignFile(L"\\bank_v2.txt");
 
 		player.AttachSoundBank(bank);
 		player.SetMaxVoices(2);

@@ -2,14 +2,14 @@
 
 #include "framework.h"
 
-class XVoiceBase;
+class XAudioVoice;
 
 class XVoiceObject : IXAudio2VoiceCallback
 {
 private:
-	WAVEFORMATEX         m_Format;
-	IXAudio2SourceVoice *m_pVoice;
-	XVoiceBase          *m_pOwner;
+	WAVEFORMATEX           m_Format;
+	IXAudio2SourceVoice   *m_pVoice;
+	IXAudio2VoiceCallback *m_pExternalCallback;
 
 public:
 
@@ -19,7 +19,7 @@ public:
 
 	operator IXAudio2SourceVoice*();
 
-	void SetOwner(XVoiceBase* pOwner);
+	void SetCallback(IXAudio2VoiceCallback* pCallack);
 
 	void Reset();
 
@@ -27,6 +27,7 @@ public:
 
 private:
 	// IXAudio2VoiceCallback part
+
 	void OnStreamEnd();
 	void OnVoiceProcessingPassEnd();
 	void OnVoiceProcessingPassStart(UINT32 SamplesRequired);

@@ -1,12 +1,12 @@
 #include "XVoiceObject.h"
 #include "XException.h"
 #include "XAudioCore.h"
-#include "XVoiceBase.h"
+#include "XAudioVoice.h"
 
 XVoiceObject::XVoiceObject(const WAVEFORMATEX& wfex)
 {
 	m_Format = wfex;
-	m_pOwner = nullptr;
+	m_pExternalCallback = nullptr;
 
 	HRESULT hr;
 	IXAudio2* pXAudio = (IXAudio2*)XAudioCore::Current();
@@ -32,14 +32,14 @@ XVoiceObject::operator IXAudio2SourceVoice*()
 	return m_pVoice;
 }
 
-void XVoiceObject::SetOwner(XVoiceBase* pOwner)
+void XVoiceObject::SetCallback(IXAudio2VoiceCallback* pCallback)
 {
-	m_pOwner = pOwner;
+	m_pExternalCallback = pCallback;
 }
 
 void XVoiceObject::Reset()
 {
-	m_pOwner = nullptr;
+	m_pExternalCallback = nullptr;
 	if (m_pVoice)
 	{
 		m_pVoice->Stop();
@@ -57,56 +57,56 @@ bool XVoiceObject::IsEqual(const WAVEFORMATEX& wfex)
 
 void XVoiceObject::OnStreamEnd()
 {
-	if (m_pOwner)
+	if (m_pExternalCallback)
 	{
-		m_pOwner->OnStreamEnd();
+		m_pExternalCallback->OnStreamEnd();
 	}
 }
 
 void XVoiceObject::OnVoiceProcessingPassEnd()
 {
-	if (m_pOwner)
+	if (m_pExternalCallback)
 	{
-		m_pOwner->OnVoiceProcessingPassEnd();
+		m_pExternalCallback->OnVoiceProcessingPassEnd();
 	}
 }
 
 void XVoiceObject::OnVoiceProcessingPassStart(UINT32 SamplesRequired)
 {
-	if (m_pOwner)
+	if (m_pExternalCallback)
 	{
-		m_pOwner->OnVoiceProcessingPassStart(SamplesRequired);
+		m_pExternalCallback->OnVoiceProcessingPassStart(SamplesRequired);
 	}
 }
 
 void XVoiceObject::OnBufferEnd(void * pBufferContext)
 {
-	if (m_pOwner)
+	if (m_pExternalCallback)
 	{
-		m_pOwner->OnBufferEnd(pBufferContext);
+		m_pExternalCallback->OnBufferEnd(pBufferContext);
 	}
 }
 
 void XVoiceObject::OnBufferStart(void * pBufferContext)
 {
-	if (m_pOwner)
+	if (m_pExternalCallback)
 	{
-		m_pOwner->OnBufferStart(pBufferContext);
+		m_pExternalCallback->OnBufferStart(pBufferContext);
 	}
 }
 
 void XVoiceObject::OnLoopEnd(void * pBufferContext)
 {
-	if (m_pOwner)
+	if (m_pExternalCallback)
 	{
-		m_pOwner->OnLoopEnd(pBufferContext);
+		m_pExternalCallback->OnLoopEnd(pBufferContext);
 	}
 }
 
 void XVoiceObject::OnVoiceError(void * pBufferContext, HRESULT Error)
 {
-	if (m_pOwner)
+	if (m_pExternalCallback)
 	{
-		m_pOwner->OnVoiceError(pBufferContext, Error);
+		m_pExternalCallback->OnVoiceError(pBufferContext, Error);
 	}
 }

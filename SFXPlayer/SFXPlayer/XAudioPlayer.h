@@ -11,27 +11,12 @@
 
 #include "XSoundBank.h"
 #include "XVoicePool.h"
-#include "XVoiceBase.h"
-#include "XPlainVoice.h"
-#include "XStreamVoice.h"
-
-// External callback.
-class IXAudioPlayerCallback
-{
-public:
-
-	// Called when streaming voice finishes playing (not when manually stopped, but reaches the end of data).
-	virtual void OnStreamingEnd(uint16_t id) = 0;
-
-	// Called when error occured.
-	virtual void OnError(const uint16_t id, const XException e) = 0;
-};
+#include "XAudioVoice.h"
+#include "IXAudioPlayerCallback.h"
 
 class XAudioPlayer
 {
-	friend class XVoiceBase;
-	friend class XPlainVoice;
-	friend class XStreamVoice;
+	friend class XAudioVoice;
 
 private:
 
@@ -81,17 +66,17 @@ private:
 	std::condition_variable m_cvNotify;
 
 	// Queues (creation / deleting / notify).
-	std::queue<std::shared_ptr<XPlainVoice>> m_CreateQueue;
-	std::queue<XPlainVoice*>                 m_DeleteQueue;
+	std::queue<std::shared_ptr<XAudioVoice>> m_CreateQueue;
+	std::queue<XAudioVoice*>                 m_DeleteQueue;
 
-	std::queue<std::shared_ptr<XStreamVoice>> m_CreateStreamQueue;
-	std::queue<XStreamVoice*>                 m_DeleteStreamQueue;
+	std::queue<std::shared_ptr<XAudioVoice>> m_CreateStreamQueue;
+	std::queue<XAudioVoice*>                 m_DeleteStreamQueue;
 
 	std::queue<XNotifyMessage> m_NotifyQueue;
 
 	// Voices list (sounds that are currently playing).
-	std::list<std::shared_ptr<XPlainVoice>>   m_Voices;
-	std::list<std::shared_ptr<XStreamVoice>>  m_StreamVoices;
+	std::list<std::shared_ptr<XAudioVoice>>  m_Voices;
+	std::list<std::shared_ptr<XAudioVoice>>  m_StreamVoices;
 
 	// Attached soundbank.
 	XSoundBank *m_pSoundBank;
@@ -141,13 +126,14 @@ public:
 
 	void StopStream(const uint16_t id);
 
+	void OnPlaybackComplete(XAudioVoice* pVoice, bool bStream);
+
 private:
+
 	friend bool PredCreator(XAudioPlayer& pObject);
 	friend bool PredDeleter(XAudioPlayer& pObject);
 	friend bool PredStreamCreator(XAudioPlayer& pObject);
 	friend bool PredStreamDeleter(XAudioPlayer& pObject);
-
-	friend bool PredStreamDecoder(XStreamVoice& pObject);
 
 	friend bool PredNotifier(XAudioPlayer& pObject);
 

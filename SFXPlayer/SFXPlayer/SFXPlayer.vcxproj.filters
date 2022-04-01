@@ -26,6 +26,12 @@
     <Filter Include="Main">
       <UniqueIdentifier>{608cb0f5-5ee7-47d4-a87c-e3400cd9be54}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Matrix">
+      <UniqueIdentifier>{17757d3c-237e-45d4-962f-49465a87d630}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Decoders">
+      <UniqueIdentifier>{cb9e29e1-65e4-48c9-b404-ca53fcf88026}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="XEFM.h">
@@ -55,22 +61,7 @@
     <ClInclude Include="XVoiceObject.h">
       <Filter>Voices</Filter>
     </ClInclude>
-    <ClInclude Include="XVoiceBase.h">
-      <Filter>Voices</Filter>
-    </ClInclude>
-    <ClInclude Include="XStreamVoice.h">
-      <Filter>Voices</Filter>
-    </ClInclude>
-    <ClInclude Include="XPlainVoice.h">
-      <Filter>Voices</Filter>
-    </ClInclude>
-    <ClInclude Include="XMusicFile.h">
-      <Filter>Bank</Filter>
-    </ClInclude>
     <ClInclude Include="XSoundBank.h">
-      <Filter>Bank</Filter>
-    </ClInclude>
-    <ClInclude Include="XSoundFile.h">
       <Filter>Bank</Filter>
     </ClInclude>
     <ClInclude Include="framework.h">
@@ -84,6 +75,33 @@
     </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="XBitMatrix.h">
+      <Filter>Matrix</Filter>
+    </ClInclude>
+    <ClInclude Include="XKeyGenerator.h">
+      <Filter>Matrix</Filter>
+    </ClInclude>
+    <ClInclude Include="XSoundDecoder.h">
+      <Filter>Decoders</Filter>
+    </ClInclude>
+    <ClInclude Include="XWMADecoder.h">
+      <Filter>Decoders</Filter>
+    </ClInclude>
+    <ClInclude Include="XPCMDecoder.h">
+      <Filter>Decoders</Filter>
+    </ClInclude>
+    <ClInclude Include="XDecoderManager.h">
+      <Filter>Decoders</Filter>
+    </ClInclude>
+    <ClInclude Include="XSoundBankParser.h">
+      <Filter>Bank</Filter>
+    </ClInclude>
+    <ClInclude Include="XAudioVoice.h">
+      <Filter>Voices</Filter>
+    </ClInclude>
+    <ClInclude Include="IXAudioPlayerCallback.h">
+      <Filter>Audio</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -114,26 +132,35 @@
     <ClCompile Include="XVoiceObject.cpp">
       <Filter>Voices</Filter>
     </ClCompile>
-    <ClCompile Include="XVoiceBase.cpp">
-      <Filter>Voices</Filter>
-    </ClCompile>
-    <ClCompile Include="XStreamVoice.cpp">
-      <Filter>Voices</Filter>
-    </ClCompile>
-    <ClCompile Include="XPlainVoice.cpp">
-      <Filter>Voices</Filter>
-    </ClCompile>
-    <ClCompile Include="XMusicFile.cpp">
-      <Filter>Bank</Filter>
-    </ClCompile>
     <ClCompile Include="XSoundBank.cpp">
-      <Filter>Bank</Filter>
-    </ClCompile>
-    <ClCompile Include="XSoundFile.cpp">
       <Filter>Bank</Filter>
     </ClCompile>
     <ClCompile Include="SFXPlayer.cpp">
       <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="XBitMatrix.cpp">
+      <Filter>Matrix</Filter>
+    </ClCompile>
+    <ClCompile Include="XKeyGenerator.cpp">
+      <Filter>Matrix</Filter>
+    </ClCompile>
+    <ClCompile Include="XSoundDecoder.cpp">
+      <Filter>Decoders</Filter>
+    </ClCompile>
+    <ClCompile Include="XWMADecoder.cpp">
+      <Filter>Decoders</Filter>
+    </ClCompile>
+    <ClCompile Include="XPCMDecoder.cpp">
+      <Filter>Decoders</Filter>
+    </ClCompile>
+    <ClCompile Include="XDecoderManager.cpp">
+      <Filter>Decoders</Filter>
+    </ClCompile>
+    <ClCompile Include="XSoundBankParser.cpp">
+      <Filter>Bank</Filter>
+    </ClCompile>
+    <ClCompile Include="XAudioVoice.cpp">
+      <Filter>Voices</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
