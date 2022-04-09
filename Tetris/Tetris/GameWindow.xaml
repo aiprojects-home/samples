@@ -1,0 +1,154 @@
+﻿<Window x:Class="Tetris.GameWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Tetris"
+        mc:Ignorable="d"
+        Title="ТетриC#" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
+
+    <Window.Resources>
+        <SolidColorBrush Color="#7FBFBFBF" x:Key="ButtonBrush"/>
+        <SolidColorBrush Color="#7F808080" x:Key="ButtonBrushHighlight"/>
+
+        <Style x:Key="MenuButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="{StaticResource ButtonBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="Red"/>
+            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="Focusable" Value="False"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border" CornerRadius="2" BorderThickness="1" 
+                            Background="{StaticResource ButtonBrush}" 
+                            BorderBrush="Gray">
+                            <ContentPresenter Margin="2" HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            RecognizesAccessKey="True"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource ButtonBrushHighlight}" />
+                                <Setter TargetName="Border" Property="BorderBrush" Value="Orange" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter TargetName="Border" Property="RenderTransformOrigin" Value="0.5,0.5" />
+                                <Setter TargetName="Border" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.9" ScaleY="0.9"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <!--
+        .......................................... СТАРТОВОЕ МЕНЮ ...........................................
+        -->
+
+        <Grid x:Name="layerMenu" Visibility="Visible">
+            <Image Source="images/splash256.png" Width="720" Height="480"/>
+            <Canvas ClipToBounds="False" Background="Transparent">
+                <Label Canvas.Left="10" Canvas.Top="10"  Foreground="White" Background="Transparent" 
+                       FontSize="20" Content="ТетриС# для Windows, (c) 2022"/>
+                <Label Canvas.Left="10" Canvas.Top="30" Foreground ="White" Background="Transparent" 
+                       FontSize="20" Content="Версия 1.1"/>
+                <Label Canvas.Left="10" Canvas.Top="50" Foreground ="White" Background="Transparent" 
+                       x:Name="lblOwner" FontSize="20" Content="Владелец копии:"/>
+
+                <Label Canvas.Left="40" Canvas.Top="430" Foreground ="White" Background="Transparent" 
+                       FontSize="20" Content="Режим 'Бетховен'"/>
+                <CheckBox Canvas.Left="20" Canvas.Top="442" x:Name="chkNoSound" Foreground="White" Background="White" FontSize="20" Click="OnSoundMode"/>
+
+                <Button x:Name="btnStartGame" Style="{StaticResource MenuButtonStyle}" Canvas.Left="500" Canvas.Top="290" Width="190" Height="50" Content="НАЧАТЬ ИГРУ" Click="OnStartGame"/>
+                <Button x:Name="btnScores" Style="{StaticResource MenuButtonStyle}" Canvas.Left="500" Canvas.Top="350" Width="190" Height="50" Content="ТАБЛИЦА РЕКОРДОВ" Click="OnShowScores"/>
+                <Button x:Name="btnQuit" Style="{StaticResource MenuButtonStyle}" Canvas.Left="500" Canvas.Top="410" Width="190" Height="50" Content="ВЫХОД В WINDOWS" Click="OnQuit"/>
+            </Canvas>
+        </Grid>
+
+         <!-- 
+        ........................................... ИГРОВОЙ СЛОЙ ............................................
+        -->
+        <Grid x:Name="layerGame" Visibility="Collapsed">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <!--  Игровое окно -->
+            <local:TBox x:Name="boxCanvas" Width ="10" Height="10" Margin="10, 10, 10, 10" Grid.Column ="0" Background ="White"/>
+            
+            <!-- Значок паузы -->
+            <Label x:Name="lblPause"  Visibility="Collapsed"  Grid.Column="0" Width="270" Height="90" Background="#7F000000" Foreground="White" 
+                   BorderThickness="2" BorderBrush="Orange" FontSize="50" FontStyle="Italic" 
+                   HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="-ПАУЗА-"/>
+            
+            <!-- Левая половина окна: панель статистики, управления и пр.-->
+            <StackPanel x:Name ="statusStack" Grid.Column="1" Grid.Row="0" Margin="0, 10, 10, 10">
+                <GroupBox Header="Следующая фигура" TextBlock.FontStyle="Italic">
+                    <local:TShapePreview x:Name="shapeCanvas" Margin="10, 10, 10, 10" Width="75" Height="75"/>
+                </GroupBox>
+                <GroupBox Header="Статистика за игру" TextBlock.FontStyle="Italic">
+                    <Grid ShowGridLines="False">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Column="0" TextBlock.FontStyle="Italic">
+                            <Label Content="Фигур уложено:" Foreground="Blue"/>
+                            <Label Content="Полных строк уложено:" Foreground="Blue"/>
+                            <Label Content="Общий счет:" Foreground="Blue"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" TextBlock.FontStyle="Normal" HorizontalAlignment="Right">
+                            <Label x:Name ="lblTotalShapes" Content="0" Foreground="Red"/>
+                            <Label x:Name ="lblSolidRows" Content="0" Foreground="Red"/>
+                            <Label x:Name ="lblTotalScore" Content="0" Foreground="Red"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+                <Expander Header="Управление" IsExpanded="True" TextBlock.FontStyle="Italic">
+                    <Grid ShowGridLines="False">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Column="0" TextBlock.FontStyle="Italic">
+                            <Label Content="Сдвиг влево" Foreground="Blue"/>
+                            <Label Content="Сдвиг вправо" Foreground="Blue"/>
+                            <Label Content="Бросить фигуру" Foreground="Blue"/>
+                            <Label Content="Поворот против часовой" Foreground="Blue"/>
+                            <Label Content="Поворот по часовой" Foreground="Blue"/>
+                            <Label Content="Пауза" Foreground="Blue"/>
+                            <Label Content="Прервать игру" Foreground="Blue"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" TextBlock.FontStyle="Normal">
+                            <Label x:Name ="lblMoveLeftKey" Content="LEFT" Foreground="Red"/>
+                            <Label x:Name ="lblMoveRightKey" Content="RIGHT" Foreground="Red"/>
+                            <Label x:Name ="lblDropKey" Content="DOWN" Foreground="Red"/>
+                            <Label x:Name ="lblRotateCCWKey" Content="Q" Foreground="Red"/>
+                            <Label x:Name ="lblRotateCWKey" Content="W" Foreground="Red"/>
+                            <Label x:Name ="lblPauseKey" Content="P" Foreground="Red"/>
+                            <Label x:Name ="lblAbortKey" Content="ESCAPE" Foreground="Red"/>
+                        </StackPanel>
+                    </Grid>
+                </Expander>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

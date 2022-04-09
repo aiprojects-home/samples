@@ -155,6 +155,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="auxBitMatrix.cpp" />
+    <ClCompile Include="auxKeyGenerator.cpp" />
     <ClCompile Include="auxPathMatrix.cpp" />
     <ClCompile Include="auxCode.cpp" />
     <ClCompile Include="auxLogger.cpp" />
@@ -163,6 +165,8 @@
     <ClCompile Include="auxParser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="auxBitMatrix.h" />
+    <ClInclude Include="auxKeyGenerator.h" />
     <ClInclude Include="auxLogger.h" />
     <ClInclude Include="auxLZWCore.h" />
     <ClInclude Include="auxLZWHash.h" />

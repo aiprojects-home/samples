@@ -1,0 +1,147 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Audio Core">
+      <UniqueIdentifier>{fcf82926-139a-4f0b-97b6-54af12c17627}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Voices">
+      <UniqueIdentifier>{652b2860-faef-418c-9b55-62f9a7f557f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Decoders">
+      <UniqueIdentifier>{06c74af0-4b42-459d-85e6-0411acbe319c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EFM">
+      <UniqueIdentifier>{0cfe14d0-329b-41bf-9146-9b6b6ee7006e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sound bank">
+      <UniqueIdentifier>{180aed0d-47d7-4a27-9284-1cbcf8f6ccc2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Auxiliary">
+      <UniqueIdentifier>{5cef2aa5-34db-409c-b355-23aa9fe61043}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{bddf6d6a-e419-4377-8087-71a041a136a1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="XAudioCore.h">
+      <Filter>Audio Core</Filter>
+    </ClInclude>
+    <ClInclude Include="XVoicePool.h">
+      <Filter>Voices</Filter>
+    </ClInclude>
+    <ClInclude Include="XVoiceObject.h">
+      <Filter>Voices</Filter>
+    </ClInclude>
+    <ClInclude Include="XAudioVoice.h">
+      <Filter>Voices</Filter>
+    </ClInclude>
+    <ClInclude Include="XSoundDecoder.h">
+      <Filter>Decoders</Filter>
+    </ClInclude>
+    <ClInclude Include="XWMADecoder.h">
+      <Filter>Decoders</Filter>
+    </ClInclude>
+    <ClInclude Include="XPCMDecoder.h">
+      <Filter>Decoders</Filter>
+    </ClInclude>
+    <ClInclude Include="XDecoderManager.h">
+      <Filter>Decoders</Filter>
+    </ClInclude>
+    <ClInclude Include="XEFM.h">
+      <Filter>EFM</Filter>
+    </ClInclude>
+    <ClInclude Include="XEFMReader.h">
+      <Filter>EFM</Filter>
+    </ClInclude>
+    <ClInclude Include="XSoundBank.h">
+      <Filter>Sound bank</Filter>
+    </ClInclude>
+    <ClInclude Include="XSoundBankParser.h">
+      <Filter>Sound bank</Filter>
+    </ClInclude>
+    <ClInclude Include="XParserBase.h">
+      <Filter>Sound bank</Filter>
+    </ClInclude>
+    <ClInclude Include="XAudioPlayer.h">
+      <Filter>Audio Core</Filter>
+    </ClInclude>
+    <ClInclude Include="IXAudioPlayerCallback.h">
+      <Filter>Audio Core</Filter>
+    </ClInclude>
+    <ClInclude Include="XGlobals.h">
+      <Filter>Audio Core</Filter>
+    </ClInclude>
+    <ClInclude Include="XAux.h">
+      <Filter>Auxiliary</Filter>
+    </ClInclude>
+    <ClInclude Include="XException.h">
+      <Filter>Auxiliary</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="XSEObject.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="XAudioCore.cpp">
+      <Filter>Audio Core</Filter>
+    </ClCompile>
+    <ClCompile Include="XAudioVoice.cpp">
+      <Filter>Voices</Filter>
+    </ClCompile>
+    <ClCompile Include="XVoicePool.cpp">
+      <Filter>Voices</Filter>
+    </ClCompile>
+    <ClCompile Include="XVoiceObject.cpp">
+      <Filter>Voices</Filter>
+    </ClCompile>
+    <ClCompile Include="XWMADecoder.cpp">
+      <Filter>Decoders</Filter>
+    </ClCompile>
+    <ClCompile Include="XSoundDecoder.cpp">
+      <Filter>Decoders</Filter>
+    </ClCompile>
+    <ClCompile Include="XPCMDecoder.cpp">
+      <Filter>Decoders</Filter>
+    </ClCompile>
+    <ClCompile Include="XDecoderManager.cpp">
+      <Filter>Decoders</Filter>
+    </ClCompile>
+    <ClCompile Include="XEFM.cpp">
+      <Filter>EFM</Filter>
+    </ClCompile>
+    <ClCompile Include="XEFMReader.cpp">
+      <Filter>EFM</Filter>
+    </ClCompile>
+    <ClCompile Include="XSoundBankParser.cpp">
+      <Filter>Sound bank</Filter>
+    </ClCompile>
+    <ClCompile Include="XSoundBank.cpp">
+      <Filter>Sound bank</Filter>
+    </ClCompile>
+    <ClCompile Include="XParserBase.cpp">
+      <Filter>Sound bank</Filter>
+    </ClCompile>
+    <ClCompile Include="XAudioPlayer.cpp">
+      <Filter>Audio Core</Filter>
+    </ClCompile>
+    <ClCompile Include="XAux.cpp">
+      <Filter>Auxiliary</Filter>
+    </ClCompile>
+    <ClCompile Include="XException.cpp">
+      <Filter>Auxiliary</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="XSEObject.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
