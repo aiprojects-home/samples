@@ -161,7 +161,7 @@ void XPCMDecoder::_ResetInternalData()
 	m_upSamples.reset();
 }
 
-void XPCMDecoder::AssignFile(const wchar_t* pFileName)
+void XPCMDecoder::AssignFile(const wchar_t* pFileName, XSoundDecoder::AssignHint Hint)
 {
 	std::unique_lock lock{ m_mtxMain };
 
@@ -341,7 +341,7 @@ void XPCMDecoder::FreeData()
 	m_nRefCount--;
 }
 
-void XPCMDecoder::DecodeStart(WAVEFORMATEX &wfex)
+void XPCMDecoder::DecodeStart()
 {
 	std::unique_lock lock{ m_mtxMain };
 
@@ -359,7 +359,6 @@ void XPCMDecoder::DecodeStart(WAVEFORMATEX &wfex)
 
 	m_nBytesRemain = m_nFileSize;
 	m_nCurrentOffset = 0;
-	wfex = m_SoundFormat;
 
 	m_bDecoding = true;
 }

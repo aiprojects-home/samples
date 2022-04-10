@@ -197,7 +197,7 @@ void XAudioVoice::Play(bool bStreaming)
 	    
 		try
 		{
-			m_pDecoder->DecodeStart(m_Format);
+			m_pDecoder->DecodeStart();
 		} 
 		catch (XException& e)
 		{

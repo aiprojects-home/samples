@@ -19,10 +19,12 @@ XSoundDecoder* XWMADecoder::CreateStatic()
 	return new XWMADecoder();
 }
 
-void XWMADecoder::_OpenFile(const wchar_t* pFileName, OpenMode Mode)
+void XWMADecoder::_OpenFile(const wchar_t* pFileName, uint8_t Mode)
 {
 	XEFMReader reader;
 
+	// 1. Обработка флага OPEN_GENERIC (=0, поэтому всегда)
+	
 	// Пытаемся окрыть файл и получить его длину:
 	try
 	{
@@ -88,7 +90,128 @@ void XWMADecoder::_OpenFile(const wchar_t* pFileName, OpenMode Mode)
 
 	pSyncReader->SetReadStreamSamples(0, FALSE);
 
-	if (Mode == OpenMode::OPEN_STREAMING)
+	// 2. Обработка флага OPEN_READ_FORMAT
+
+	if (Mode & (uint8_t)OpenMode::OPEN_READ_FORMAT)
+	{
+		IWMOutputMediaProps* pMediaProps = NULL;
+		DWORD                dwPropsBufferSize = 0;
+		WM_MEDIA_TYPE*       pMediaType = NULL;
+
+		if FAILED(pSyncReader->GetOutputProps(0, &pMediaProps))
+		{
+			throw XException(L"XWMADecoder()::_OpenFile(): can't get stream properties");
+		};
+
+		std::unique_ptr<IWMOutputMediaProps, decltype(&XAux::COM_deleter)> upMediaProps{ pMediaProps, XAux::COM_deleter };
+
+		pMediaProps->GetMediaType(NULL, &dwPropsBufferSize);
+
+		std::unique_ptr<BYTE[]> upPropsData{ new BYTE[dwPropsBufferSize] };
+
+		if FAILED(pMediaProps->GetMediaType((WM_MEDIA_TYPE*)upPropsData.get(), &dwPropsBufferSize))
+		{
+			throw XException(L"XWMADecoder()::_OpenFile(): can't get media type");
+		};
+
+		pMediaType = (WM_MEDIA_TYPE*)upPropsData.get();
+
+		// Убеждаемся, что наш файл содержит аудио:
+
+		if ((pMediaType->majortype != WMMEDIATYPE_Audio) || (pMediaType->formattype != WMFORMAT_WaveFormatEx))
+		{
+			throw XException(L"XWMADecoder()::_OpenFile(): unsupported file type");
+		};
+
+		// Сохраняем формат файла:
+		WAVEFORMATEX *pWaveFormatEx = (WAVEFORMATEX*)pMediaType->pbFormat;
+
+		m_SoundFormat.wFormatTag = WAVE_FORMAT_PCM;
+		m_SoundFormat.nChannels = pWaveFormatEx->nChannels;
+		m_SoundFormat.nSamplesPerSec = pWaveFormatEx->nSamplesPerSec;
+		m_SoundFormat.wBitsPerSample = pWaveFormatEx->wBitsPerSample;
+		m_SoundFormat.nBlockAlign = m_SoundFormat.nChannels * m_SoundFormat.wBitsPerSample / 8;
+		m_SoundFormat.nAvgBytesPerSec = m_SoundFormat.nSamplesPerSec * m_SoundFormat.nBlockAlign;
+		m_SoundFormat.cbSize = 0;
+	};
+
+	// 3. Обработка флага OPEN_GET_SIZE & OPEN_LOAD_SAMPLES
+	
+	if ( (Mode & (uint8_t)OpenMode::OPEN_GET_SIZE) || (Mode & (uint8_t)OpenMode::OPEN_LOAD_SAMPLES))
+	{
+		// Распаковываем (определяем длину файла -- это нужно сделать в любом случае, будет загрузка или нет):
+		
+		std::list < std::unique_ptr<INSSBuffer, decltype(&XAux::COM_deleter)>> listBuffers;
+		INSSBuffer *pBuffer = NULL;
+
+		m_nFileSize = 0;
+
+		for (;;)
+		{
+			HRESULT hResult;
+			QWORD   qwSampleTime;
+			QWORD   qwSampleDuration;
+			DWORD   dwFlags;
+			DWORD   dwOutputNum;
+			WORD    wStreamNum;
+			DWORD   dwSamplesLength;
+
+			hResult = pSyncReader->GetNextSample(0, &pBuffer, &qwSampleTime, &qwSampleDuration, &dwFlags, &dwOutputNum, &wStreamNum);
+
+			if (hResult == NS_E_NO_MORE_SAMPLES)
+			{
+				break;
+			}
+			else
+				if (hResult != S_OK)
+				{
+					throw XException(L"XWMADecoder()::_OpenFile(): unpacking error");
+
+					break;
+				};
+
+			pBuffer->GetLength(&dwSamplesLength);
+
+			m_nFileSize += dwSamplesLength;
+
+			if ((Mode & (uint8_t)OpenMode::OPEN_LOAD_SAMPLES))
+			{
+				// Установлен флаг загрузки - сохраняем буфер в списке:
+				listBuffers.emplace_back(pBuffer, XAux::COM_deleter);
+			}
+			else
+			{
+				// Загрузки не будет - освобождаем память.
+				pBuffer->Release();
+			}
+		};
+
+		pSyncReader->SetRange(0, 0);
+
+		if (Mode & (uint8_t)OpenMode::OPEN_LOAD_SAMPLES)
+		{
+			// Непосредственно загрузка. Копируем содержимое буферов.
+
+			m_upSamples.reset(new BYTE[m_nFileSize]);
+
+			DWORD dwOffset{ 0 };
+
+			for (const auto &ptr_buf : listBuffers)
+			{
+				DWORD dwLength;
+				BYTE* pData;
+
+				ptr_buf->GetBufferAndLength(&pData, &dwLength);
+
+				std::copy(pData, pData + dwLength, m_upSamples.get() + dwOffset);
+				dwOffset += dwLength;
+			}
+		};
+	}
+
+	// 4. Обработка флага OPEN_STREAM
+
+	if ( (Mode & (uint8_t)OpenMode::OPEN_STREAM) )
 	{
 		// Подготовка к декодированию. Отпускаем upGH (его потом удалит upStream), сохраняем ридер и поток.
 
@@ -96,128 +219,9 @@ void XWMADecoder::_OpenFile(const wchar_t* pFileName, OpenMode Mode)
 		m_upStream = std::move(upStream);
 
 		upGH.release();
-
-		return;
 	}
 
-	// Далее идеит анализ и, возможно, загрузка семплов.
-
-	// Определяем характеристики файла.
-
-	IWMOutputMediaProps* pMediaProps = NULL;
-	DWORD                dwPropsBufferSize = 0;
-	WM_MEDIA_TYPE*       pMediaType = NULL;
-
-	if FAILED(pSyncReader->GetOutputProps(0, &pMediaProps))
-	{
-		throw XException(L"XWMADecoder()::_OpenFile(): can't get stream properties");
-	};
-
-	std::unique_ptr<IWMOutputMediaProps, decltype(&XAux::COM_deleter)> upMediaProps{ pMediaProps, XAux::COM_deleter };
-
-	pMediaProps->GetMediaType(NULL, &dwPropsBufferSize);
-
-	std::unique_ptr<BYTE[]> upPropsData{ new BYTE[dwPropsBufferSize] };
-
-	if FAILED(pMediaProps->GetMediaType((WM_MEDIA_TYPE*)upPropsData.get(), &dwPropsBufferSize))
-	{
-		throw XException(L"XWMADecoder()::_OpenFile(): can't get media type");
-	};
-
-	pMediaType = (WM_MEDIA_TYPE*)upPropsData.get();
-
-	// Убеждаемся, что наш файл содержит аудио:
-
-	if ((pMediaType->majortype != WMMEDIATYPE_Audio) || (pMediaType->formattype != WMFORMAT_WaveFormatEx))
-	{
-		throw XException(L"XWMADecoder()::_OpenFile(): unsupported file type");
-	};
-
-	// Сохраняем формат файла:
-	WAVEFORMATEX *pWaveFormatEx = (WAVEFORMATEX*)pMediaType->pbFormat;
-
-	m_SoundFormat.wFormatTag = WAVE_FORMAT_PCM;
-	m_SoundFormat.nChannels = pWaveFormatEx->nChannels;
-	m_SoundFormat.nSamplesPerSec = pWaveFormatEx->nSamplesPerSec;
-	m_SoundFormat.wBitsPerSample = pWaveFormatEx->wBitsPerSample;
-	m_SoundFormat.nBlockAlign = m_SoundFormat.nChannels * m_SoundFormat.wBitsPerSample / 8;
-	m_SoundFormat.nAvgBytesPerSec = m_SoundFormat.nSamplesPerSec * m_SoundFormat.nBlockAlign;
-	m_SoundFormat.cbSize = 0;
-	
-	// Распаковываем (определяем длину файла):
-
-	std::list < std::unique_ptr<INSSBuffer, decltype(&XAux::COM_deleter)>> listBuffers;
-	INSSBuffer *pBuffer = NULL;
-
-	m_nFileSize = 0;
-
-	for (;;)
-	{
-		HRESULT hResult;
-		QWORD   qwSampleTime;
-		QWORD   qwSampleDuration;
-		DWORD   dwFlags;
-		DWORD   dwOutputNum;
-		WORD    wStreamNum;
-		DWORD   dwSamplesLength;
-
-		hResult = pSyncReader->GetNextSample(0, &pBuffer, &qwSampleTime, &qwSampleDuration, &dwFlags, &dwOutputNum, &wStreamNum);
-
-		if (hResult == NS_E_NO_MORE_SAMPLES)
-		{
-			break;
-		}
-		else
-			if (hResult != S_OK)
-			{
-				throw XException(L"XWMADecoder()::_OpenFile(): unpacking error");
-
-				break;
-			};
-
-		pBuffer->GetLength(&dwSamplesLength);
-
-		m_nFileSize += dwSamplesLength;
-
-		if (Mode == OpenMode::OPEN_LOAD_SAMPLES)
-		{
-			// Установлен флаг загрузки - сохраняем буфер в списке:
-			listBuffers.emplace_back(pBuffer, XAux::COM_deleter);
-		}
-		else
-		{
-			// Загрузки не будет - освобождаем память.
-			pBuffer->Release();
-		}
-	};
-
-	pSyncReader->SetRange(0, 0);
-
-	if (Mode == OpenMode::OPEN_ANALYSE)
-	{
-		// Все сделано - формат и длину определили, выходим.
-		return;
-	} else
-	if (Mode == OpenMode::OPEN_LOAD_SAMPLES)
-	{
-
-		// Загрузка. Копируем содержимое буферов.
-
-		m_upSamples.reset(new BYTE[m_nFileSize]);
-
-		DWORD dwOffset{ 0 };
-
-		for (const auto &ptr_buf : listBuffers)
-		{
-			DWORD dwLength;
-			BYTE* pData;
-
-			ptr_buf->GetBufferAndLength(&pData, &dwLength);
-
-			std::copy(pData, pData + dwLength, m_upSamples.get() + dwOffset);
-			dwOffset += dwLength;
-		}
-	};
+	// Все OK.
 }
 
 void XWMADecoder::_ResetInternalData()
@@ -237,7 +241,7 @@ void XWMADecoder::_ResetInternalData()
 	m_upStream.reset();
 }
 
-void XWMADecoder::AssignFile(const wchar_t* pFileName)
+void XWMADecoder::AssignFile(const wchar_t* pFileName, XSoundDecoder::AssignHint Hint)
 {
 	std::unique_lock lock{ m_mtxMain };
 
@@ -247,11 +251,31 @@ void XWMADecoder::AssignFile(const wchar_t* pFileName)
 		throw XException(L"XWMADecoder()::AssignFile(): file is already assigned");
 	}
 
+	// Сохраняем подсказку режима работы.
+	m_hintMode = Hint;
+
 	try
 	{
-		// Пытаемся открыть файл без загрузки:
+		// В зависимости от подсказки, открываем в разных режимах:
+		uint8_t nMode{ 0 };
 
-		_OpenFile(pFileName, OpenMode::OPEN_ANALYSE);
+		if (Hint == XSoundDecoder::AssignHint::HINT_STREAM_ONLY)
+		{
+			// Для потокового воспроизведения достаточно только получить формат.
+			nMode = (uint8_t)OpenMode::OPEN_GENERIC | (uint8_t)OpenMode::OPEN_READ_FORMAT;
+		} else
+		if ((Hint == XSoundDecoder::AssignHint::HINT_FETCH_ONLY) || (Hint == XSoundDecoder::AssignHint::HINT_MIXED))
+		{
+			// Для остальных режимов - нужна еще и длина, но семплы не грузим.
+			nMode = (uint8_t)OpenMode::OPEN_GENERIC | (uint8_t)OpenMode::OPEN_READ_FORMAT | (uint8_t)OpenMode::OPEN_GET_SIZE;
+		}
+		else
+		{
+			// Непонятный формат?
+			throw XException(L"XWMADecoder()::AssignFile(): can't resolve hint flag");
+		}
+
+		_OpenFile(pFileName, nMode);
 	}
 	catch (const XException& e)
 	{
@@ -291,9 +315,9 @@ bool XWMADecoder::Load()
 {
 	std::unique_lock lock{ m_mtxMain };
 
-	if ( (!m_bAssigned) || (m_bDecoding) )
+	if ( (!m_bAssigned) || (m_bDecoding) || (m_hintMode == XSoundDecoder::AssignHint::HINT_STREAM_ONLY) )
 	{
-		// Файл не был открыт (нечего загружать) или декодируется.
+		// Файл не был открыт (нечего загружать), декодируется или при назначении загрузка не предполагалась.
 		return false;
 	};
 
@@ -306,11 +330,11 @@ bool XWMADecoder::Load()
 	// Пытаемся загрузить:
 	try
 	{
-		_OpenFile(m_strFileName.c_str(), OpenMode::OPEN_LOAD_SAMPLES);
+		_OpenFile(m_strFileName.c_str(), (uint8_t)OpenMode::OPEN_LOAD_SAMPLES);
 	}
 	catch (const XException& e)
 	{
-		// По каким-то причинам загрузить не удалось, хотя первое открытие (ANALYSE) было удачным.
+		// По каким-то причинам загрузить не удалось, хотя первое открытие и было удачным.
 
 		UNREFERENCED_PARAMETER(e);
 
@@ -350,6 +374,13 @@ uint32_t XWMADecoder::GetSize()
 {
 	std::shared_lock lock{ m_mtxMain };
 
+	// Если загружать не предполагалось -- возвращаем 0.
+
+	if (m_hintMode == XSoundDecoder::AssignHint::HINT_STREAM_ONLY)
+	{
+		return 0;
+	}
+
 	return m_nFileSize;
 }
 
@@ -372,9 +403,9 @@ bool XWMADecoder::GetData(std::unique_ptr<BYTE[]> &refData)
 {
 	std::shared_lock lock{ m_mtxMain };
 
-	if ((!m_bAssigned) || (!m_bLoaded))
+	if ((!m_bAssigned) || (!m_bLoaded) || (m_hintMode == XSoundDecoder::AssignHint::HINT_STREAM_ONLY))
 	{
-		// Файл не был загружен, нечего возвращать.
+		// Файл не был загружен, либо загрузка не предполагалась --  нечего возвращать.
 		return false;
 	}
 
@@ -391,7 +422,7 @@ bool XWMADecoder::GetDataDirect(BYTE*& refData)
 {
 	std::unique_lock lock{ m_mtxMain };
 
-	if ((!m_bAssigned) || (!m_bLoaded))
+	if ((!m_bAssigned) || (!m_bLoaded) || (m_hintMode == XSoundDecoder::AssignHint::HINT_STREAM_ONLY))
 	{
 		// Нечего возвращать.
 		return false;
@@ -417,7 +448,7 @@ void XWMADecoder::FreeData()
 	m_nRefCount--;
 }
 
-void XWMADecoder::DecodeStart(WAVEFORMATEX &wfex)
+void XWMADecoder::DecodeStart()
 {
 	std::unique_lock lock{ m_mtxMain };
 
@@ -433,17 +464,22 @@ void XWMADecoder::DecodeStart(WAVEFORMATEX &wfex)
 		throw XException(L"XWMADecoder()::DecodeStart(): file '%s' is already decoding", m_strFileName);
 	}
 
+	if (m_hintMode == XSoundDecoder::AssignHint::HINT_FETCH_ONLY)
+	{
+		// Режим -- только загрузка.
+		throw XException(L"XWMADecoder()::DecodeStart(): file '%s' is for fetch-only mode", m_strFileName);
+	}
+
 	try
 	{
 		// Пытаемся открыть для распаковки:
-		_OpenFile(m_strFileName.c_str(), OpenMode::OPEN_STREAMING);
+		_OpenFile(m_strFileName.c_str(), (uint8_t)OpenMode::OPEN_STREAM);
 	}
 	catch (const XException& e)
 	{
 		throw XException(e, L"XWMADecoder::DecodeStart(): can't start decoding");
 	}
 
-	wfex = m_SoundFormat;
 	m_bDecoding = true;
 }
 

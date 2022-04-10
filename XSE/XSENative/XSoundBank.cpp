@@ -43,7 +43,26 @@ void XSoundBank::AssignFile(const wchar_t* pFileName)
 		// Пытаемся подобрать декодер.
 		try
 		{
-			pSoundDecoder = XDecoderManager::Current().OpenFile(entry.strFileName.c_str());
+			XSoundDecoder::AssignHint Hint;
+
+			if ( (entry.bFetch) && (entry.bStream) )
+			{
+				// Все режимы.
+				Hint = XSoundDecoder::AssignHint::HINT_MIXED;
+			}
+			else
+			if (entry.bFetch)
+			{
+				// Только загрузка
+				Hint = XSoundDecoder::AssignHint::HINT_FETCH_ONLY;
+			} else
+			if (entry.bStream)
+			{
+				// Только потоковое воспроизведение.
+				Hint = XSoundDecoder::AssignHint::HINT_STREAM_ONLY;
+			};
+
+			pSoundDecoder = XDecoderManager::Current().OpenFile(entry.strFileName.c_str(), Hint);
 
 			entry.spDecoder.reset(pSoundDecoder);
 			

@@ -34,38 +34,26 @@ void XAudioPlayer::AttachSoundBank(XSoundBank* pBank)
 
 void XAudioPlayer::SetMaxVoices(const uint8_t count)
 {
-	std::unique_lock lock{ m_MainLock };
-	std::unique_lock vlock{ m_VoicesLock }; // потому что рабочий поток тоже читает это поле
-
 	m_nMaxVoices = count;
 }
 
 uint8_t XAudioPlayer::GetMaxVoices() const
 {
-	std::shared_lock lock{ m_MainLock };
-
 	return m_nMaxVoices;
 }
 
 void XAudioPlayer::SetMaxStreamVoices(const uint8_t count)
 {
-	std::unique_lock lock{ m_MainLock };
-
 	m_nMaxStreamVoices = count;
 }
 
 uint8_t XAudioPlayer::GetMaxStreamVoices() const
 {
-	std::shared_lock lock{ m_MainLock };
-
 	return m_nMaxStreamVoices;
 }
 
 void XAudioPlayer::SetCallback(IXAudioPlayerCallback *pCallback)
 {
-	std::unique_lock lock{ m_MainLock };
-	std::unique_lock qlock{ m_NotifyLock }; // потому что рабочий поток тоже читает это поле
-
 	m_pCallback = pCallback;
 }
 
@@ -181,6 +169,7 @@ void XAudioPlayer::PlaySimple(const uint16_t nId, float fVolume, float fPan)
 		spVoice->Init(nId, this, &m_VoicePool, m_pSoundBank);
 
 		m_CreateQueue.push(spVoice);
+
 	}
 
 	m_cvCreate.notify_one();
@@ -225,11 +214,6 @@ void XAudioPlayer::PlayStream(const uint16_t nId, float fVolume)
 	}
 
 	m_cvCreateStream.notify_one();
-}
-
-bool PredCreator(XAudioPlayer& pObject)
-{
-	return (pObject.m_bTerminateFlag || pObject.m_CreateQueue.size());
 }
 
 void XAudioPlayer::StopStream(const uint16_t id)
@@ -300,6 +284,11 @@ void XAudioPlayer::OnPlaybackComplete(XAudioVoice* pVoice, bool bStream)
 	}
 }
 
+bool PredCreator(XAudioPlayer& pObject)
+{
+	return (pObject.m_bTerminateFlag || pObject.m_CreateQueue.size());
+}
+
 void XAudioPlayer::ThreadCreator()
 {
 	XAudioPlayer& p = *this;
@@ -318,6 +307,7 @@ void XAudioPlayer::ThreadCreator()
 		}
 
 		// В очереди что-то есть. Создаем голоса.
+
 		while (!m_CreateQueue.empty())
 		{
 			std::shared_ptr<XAudioVoice> spVoice = m_CreateQueue.front();
@@ -544,14 +534,14 @@ void XAudioPlayer::ThreadNotifier()
 			    case XPlayerNotify::XN_STREAMING_STOP:
 			    {
     				// Потоковое воспроизведение закончилось.
-					m_pCallback->OnStreamingEnd(msg.m_nVoiceId);
+					m_pCallback.load()->OnStreamingEnd(msg.m_nVoiceId);
 
 				    break;
 			    }
 				case XPlayerNotify::XN_ERROR:
 				{
 					// Некритическая ошибка во время воспроизведения.
-					m_pCallback->OnError(msg.m_nVoiceId, std::any_cast<XException>(msg.m_Extra));
+					m_pCallback.load()->OnError(msg.m_nVoiceId, std::any_cast<XException>(msg.m_Extra));
 
 					break;
 				}

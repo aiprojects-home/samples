@@ -37,7 +37,7 @@ XDecoderManager& XDecoderManager::Current()
 
 }
 
-XSoundDecoder* XDecoderManager::OpenFile(const wchar_t *pFileName) const
+XSoundDecoder* XDecoderManager::OpenFile(const wchar_t *pFileName, XSoundDecoder::AssignHint Hint) const
 {
 	std::shared_lock lock{ m_mtxMainLock };
 
@@ -51,7 +51,7 @@ XSoundDecoder* XDecoderManager::OpenFile(const wchar_t *pFileName) const
 
 		try
 		{
-			pDecoder->AssignFile(pFileName);
+			pDecoder->AssignFile(pFileName, Hint);
 		}
 		catch (XException &e)
 		{

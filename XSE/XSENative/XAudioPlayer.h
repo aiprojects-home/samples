@@ -82,11 +82,11 @@ private:
 	std::atomic<bool> m_bRunning;
 
 	// Максимальное число голосов для воспроизведения.
-	uint8_t m_nMaxVoices;
-	uint8_t m_nMaxStreamVoices;
+	std::atomic<uint8_t> m_nMaxVoices;
+	std::atomic<uint8_t> m_nMaxStreamVoices;
 
 	// Указатель на внешний интерфейс для уведомлений.
-	IXAudioPlayerCallback *m_pCallback;
+	std::atomic<IXAudioPlayerCallback*> m_pCallback;
 
 public:
 

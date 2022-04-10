@@ -5,10 +5,19 @@
 class XSoundDecoder
 {
 public:
+
+	// Подсказка для оптимизации настройки декодера.
+	enum class AssignHint
+	{
+		HINT_FETCH_ONLY = 1,  // только для загрузки
+		HINT_STREAM_ONLY = 2, // только для потокового воспроизведения
+		HINT_MIXED = 3        // оба режима
+	};
+
 	virtual ~XSoundDecoder();
 
 	// Метод назначает указанный файл.
-	virtual void AssignFile(const wchar_t* pFileName) = 0;
+	virtual void AssignFile(const wchar_t* pFileName, XSoundDecoder::AssignHint Hint) = 0;
     
 	// Метод сбрасывает текущий назначенный файл и освобождает ресурсы.
 	virtual bool ReleaseFile() = 0;
@@ -41,7 +50,7 @@ public:
 	virtual void FreeData() = 0;
 
 	// Метод подготавливает открытый файл к декодированию.
-	virtual void DecodeStart(WAVEFORMATEX &wfex) = 0;
+	virtual void DecodeStart() = 0;
 	
 	// Метод распаковывает очередную порцию данных.
 	virtual uint32_t DecodeBytes(std::unique_ptr<uint8_t[]>& refDestBuffer, const uint32_t nCount) = 0;

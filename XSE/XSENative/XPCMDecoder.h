@@ -42,7 +42,7 @@ public:
 
 	// Реализация интерфейса XSoundDecoder.
 
-	virtual void AssignFile(const wchar_t* pFileName);
+	virtual void AssignFile(const wchar_t* pFileName, XSoundDecoder::AssignHint Hint);
 	virtual bool ReleaseFile();
 	virtual bool IsAssigned();
 	virtual bool Load();
@@ -53,7 +53,7 @@ public:
 	virtual bool GetData(std::unique_ptr<BYTE[]> &refData);
 	virtual bool GetDataDirect(BYTE*& refData);
 	virtual void FreeData();
-	virtual void DecodeStart(WAVEFORMATEX &wfex);
+	virtual void DecodeStart();
 	virtual uint32_t DecodeBytes(std::unique_ptr<uint8_t[]>& refDestBuffer, const uint32_t nCount);
 	virtual bool DecodeStop();
 	virtual bool IsDecoding();

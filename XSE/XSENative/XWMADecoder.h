@@ -10,7 +10,7 @@ private:
 	std::wstring    m_strFileName; // имя файла
 	uint32_t        m_nFileSize;   // размер данных (байт)
 	WAVEFORMATEX    m_SoundFormat; // формат файла
-
+	
 	bool            m_bLoaded;     // TRUE, файл загружен в память
 	bool            m_bAssigned;   // TRUE, файл открыт
 	bool            m_bDecoding;   // TRUE, файл декодируется
@@ -30,7 +30,11 @@ private:
 	// Мьютекс для потокобезопасности:
 	mutable std::shared_mutex m_mtxMain;
 
+	// Режим работы (устанавливается в AssignFile():
+	XSoundDecoder::AssignHint m_hintMode;
+
 public:
+
 	XWMADecoder();
 	virtual ~XWMADecoder();
 
@@ -41,12 +45,14 @@ private:
 	// Режимы загрузки файла для метода _OpenFile()
 	enum class OpenMode : uint8_t
 	{
-		OPEN_ANALYSE = 0,      // определение формата
-		OPEN_LOAD_SAMPLES = 1, // определение формата и загрузка семплов в память
-		OPEN_STREAMING = 2     // подготовка к декодированию
+		OPEN_GENERIC      = 0, // открыть и попытаться подобрать кодек
+		OPEN_READ_FORMAT  = 1, // + прочитать формат в m_SoundFormat
+		OPEN_GET_SIZE     = 2, // + определить размер и установить m_nFileSize
+		OPEN_LOAD_SAMPLES = 4, // + загрузить семплы в m_upSamples
+		OPEN_STREAM       = 8  // + подготовить к потоковому декодированию
 	};
 
-	void _OpenFile(const wchar_t* pFileName, OpenMode Mode);
+	void _OpenFile(const wchar_t* pFileName, uint8_t Mode);
 
 	void _ResetInternalData();
 
@@ -54,7 +60,7 @@ public:
 
 	// Реализация интерфейса XSoundDecoder.
 
-	virtual void AssignFile(const wchar_t* pFileName);
+	virtual void AssignFile(const wchar_t* pFileName, XSoundDecoder::AssignHint Hint);
 	virtual bool ReleaseFile();
 	virtual bool IsAssigned();
 	virtual bool Load();
@@ -65,7 +71,7 @@ public:
 	virtual bool GetData(std::unique_ptr<BYTE[]> &refData);
 	virtual bool GetDataDirect(BYTE*& refData);
 	virtual void FreeData();
-	virtual void DecodeStart(WAVEFORMATEX &wfex);
+	virtual void DecodeStart();
 	virtual uint32_t DecodeBytes(std::unique_ptr<uint8_t[]>& refDestBuffer, const uint32_t nCount);
 	virtual bool DecodeStop();
 	virtual bool IsDecoding();

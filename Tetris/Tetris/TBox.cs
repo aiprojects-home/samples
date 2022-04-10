@@ -572,8 +572,11 @@ namespace Tetris
                             }
                         case GameCommands.Drop:
                             {
-                                boxState = BoxState.stateShapeFall;
-                                boxNotify.OnShapeDrop(CalculateShapeParameter(currentShape, shapeX));
+                                if (IsShapeFit(currentShape, shapeX, shapeY + 1))
+                                {
+                                    boxState = BoxState.stateShapeFall;
+                                    boxNotify.OnShapeDrop(CalculateShapeParameter(currentShape, shapeX));
+                                }
 
                                 break;
                             }
@@ -640,7 +643,7 @@ namespace Tetris
                     }
                 }
             } else
-            if (boxState == BoxState.stateShapeFall)
+            if ( (boxState == BoxState.stateShapeFall) && (currentShape != null))
             {
                 // В данном режиме фигура падает каждое обновление, управление не работает.
                 // Однако, при попытке перевернуть фигуру или сдвинуть её - переходим в обычный режим.

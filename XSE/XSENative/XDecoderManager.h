@@ -23,6 +23,6 @@ public:
 
 	static XDecoderManager& Current();
 
-	XSoundDecoder* OpenFile(const wchar_t *pFileName) const;
+	XSoundDecoder* OpenFile(const wchar_t *pFileName, XSoundDecoder::AssignHint Hint) const;
 };
 
